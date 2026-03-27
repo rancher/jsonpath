@@ -51,6 +51,10 @@ func parseInt(path []byte, value int) (int, int, error) {
 func parseIndexRange(path []byte, start int) (int, *subscript, error) {
 	var i int
 
+	if len(path) == 0 {
+		return 0, nil, fmt.Errorf("expected ']' but none")
+	}
+
 	if path[0] == ']' {
 		return 1, &subscript{start: &start, end: ptr.To(-1)}, nil
 	}

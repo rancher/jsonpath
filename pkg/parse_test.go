@@ -345,6 +345,11 @@ func TestParse(t *testing.T) {
 			Input: "$.[a,,].child",
 			Err:   fmt.Errorf("failed to parse child selector: union options may not be empty"),
 		},
+		{
+			Name:  "With Incomplete Range at JSONPath End",
+			Input: "$['test'][5:",
+			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index range: expected ']' but none"),
+		},
 	}
 
 	for _, c := range cases {
