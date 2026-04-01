@@ -88,6 +88,10 @@ func parseIndexRange(path []byte, start int) (int, *subscript, error) {
 		return 0, nil, fmt.Errorf("failed to parse range step: %v", err)
 	}
 
+	if step <= 0 {
+		return 0, nil, fmt.Errorf("range step must be greater than zero")
+	}
+
 	i += consumed
 	if i >= len(path) {
 		// Handle incomplete range e.g. "$['x'][0:10:
@@ -121,6 +125,11 @@ func parseIndexUnion(path []byte, start int) (int, *subscript, error) {
 		i += consumed
 
 		r.union = append(r.union, n)
+
+		if i >= len(path) {
+			// Handle missing closing brackets e.g. "$['x'][2,4"
+			return 0, nil, fmt.Errorf("expected ']' but none")
+		}
 
 		if path[i] == ']' {
 			break

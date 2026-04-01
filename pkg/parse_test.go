@@ -363,6 +363,12 @@ func TestParse(t *testing.T) {
 		{
 			Name:  "With missing closing bracket in index union",
 			Input: "$['x'][2,4",
+			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index union: expected ']' but none"),
+		},
+		{
+			Name:  "With zero step in index range",
+			Input: "$['x'][0:10:0]",
+			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index range: range step must be greater than zero"),
 		},
 		{
 			Name:  "With trailing dot",
@@ -373,6 +379,11 @@ func TestParse(t *testing.T) {
 			Name:  "With trailing dots",
 			Input: "$..",
 			Err:   fmt.Errorf("failed to parse child selector: unexpected end of path"),
+		},
+		{
+			Name:  "With Range Step zero",
+			Input: "$['x'][0:10:0]",
+			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index range: range step must be greater than zero"),
 		},
 	}
 

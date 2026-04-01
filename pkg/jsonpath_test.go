@@ -161,7 +161,8 @@ func TestJsonPathSet(t *testing.T) {
 		})
 	}
 }
-func TestJSONPathMatchesPanicsWithStartEndRangeNoStep(t *testing.T) {
+
+func TestJSONPathMatchesWithStartEndRangeNoStep(t *testing.T) {
 	jsonPath, err := Parse("$.parent[0:10]")
 	assert.NoError(t, err)
 
@@ -171,7 +172,5 @@ func TestJSONPathMatchesPanicsWithStartEndRangeNoStep(t *testing.T) {
 		WithIndexNode(5, make([]any, 10)).
 		Build()
 
-	assert.Panics(t, func() {
-		_ = jsonPath.Matches(path)
-	})
+	assert.True(t, jsonPath.Matches(path))
 }
