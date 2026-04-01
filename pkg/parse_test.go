@@ -361,6 +361,10 @@ func TestParse(t *testing.T) {
 			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index range: expected ']' but none"),
 		},
 		{
+			Name:  "With missing closing bracket in index union",
+			Input: "$['x'][2,4",
+		},
+		{
 			Name:  "With trailing dot",
 			Input: "$.",
 			Err:   fmt.Errorf("unexpected end of path"),
