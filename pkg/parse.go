@@ -18,17 +18,21 @@ func isAlphabetic(b byte) bool {
 
 // parseInt attempts to parse an integer from the provided byte slice. If no integer could be found, value is returned.
 func parseInt(path []byte, value int) (int, int, error) {
+	if len(path) == 0 {
+		return 0, value, nil
+	}
+
 	intBytes := make([]byte, len(path))
 
 	var i int
-	var c byte
 
 	if path[i] == '-' {
 		intBytes[i] = '-'
 		i++
 	}
 
-	for i, c = range path {
+	for ; i < len(path); i++ {
+		c := path[i]
 		if c == ':' || c == ']' || c == ',' {
 			break
 		}
@@ -65,11 +69,13 @@ func parseIndexRange(path []byte, start int) (int, *subscript, error) {
 	}
 
 	i += consumed
+	if i >= len(path) {
+		return 0, nil, fmt.Errorf("expected ']' but none")
+	}
 
 	if path[i] == ']' {
 		return i + 1, &subscript{start: &start, end: &end}, nil
 	} else if path[i] != ':' {
-		i++
 		return 0, nil, fmt.Errorf("expected \":\" but found %c", path[i])
 	}
 
@@ -80,6 +86,9 @@ func parseIndexRange(path []byte, start int) (int, *subscript, error) {
 	}
 
 	i += consumed
+	if i >= len(path) {
+		return 0, nil, fmt.Errorf("expected ']' but none")
+	}
 
 	if path[i] != ']' {
 		return 0, nil, fmt.Errorf("expected \"]\" but found %c", path[i])

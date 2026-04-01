@@ -273,7 +273,7 @@ func TestParse(t *testing.T) {
 		{
 			Name:  "With Unescapped Open Bracket",
 			Input: "$.with[bracket.child",
-			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse range start: failed to parse integer: strconv.Atoi: parsing \"bracket.chil\": invalid syntax"),
+			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse range start: failed to parse integer: strconv.Atoi: parsing \"bracket.child\": invalid syntax"),
 		},
 		{
 			Name:  "With Invalid Index",
@@ -351,6 +351,11 @@ func TestParse(t *testing.T) {
 			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index range: expected ']' but none"),
 		},
 		{
+			Name:  "With incomplete multi-digit range",
+			Input: "$['x'][0:10",
+			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index range: expected ']' but none"),
+		},
+		{
 			Name:  "With trailing dot",
 			Input: "$.",
 			Err:   fmt.Errorf("unexpected end of path"),
@@ -359,10 +364,6 @@ func TestParse(t *testing.T) {
 			Name:  "With trailing dots",
 			Input: "$..",
 			Err:   fmt.Errorf("failed to parse child selector: unexpected end of path"),
-		},
-		{
-			Name:  "With incomplete multi-digit range",
-			Input: "$['x'][0:10",
 		},
 	}
 
