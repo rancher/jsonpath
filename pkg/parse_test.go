@@ -350,6 +350,14 @@ func TestParse(t *testing.T) {
 			Input: "$['test'][5:",
 			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index range: expected ']' but none"),
 		},
+		{
+			Name:  "With trailing dot",
+			Input: "$.",
+		},
+		{
+			Name:  "With trailing dots",
+			Input: "$..",
+		},
 	}
 
 	for _, c := range cases {
