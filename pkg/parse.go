@@ -331,6 +331,10 @@ func parseChildUnion(path []byte) (int, selector, error) {
 }
 
 func parseRecursiveDescent(path []byte) (int, selector, error) {
+	if len(path) == 0 {
+		return 0, nil, fmt.Errorf("unexpected end of path")
+	}
+
 	var s selector
 	var consumed int
 	var err error
@@ -386,6 +390,10 @@ func Parse(path string) (*JSONPath, error) {
 			var s selector
 			var err error
 			var consumed int
+
+			if i+1 >= len(pathBytes) {
+				return nil, fmt.Errorf("unexpected end of path")
+			}
 
 			if pathBytes[i+1] == '[' {
 				consumed, s, err = parseChildUnion(pathBytes[i+1:])

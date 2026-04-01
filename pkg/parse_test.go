@@ -353,10 +353,12 @@ func TestParse(t *testing.T) {
 		{
 			Name:  "With trailing dot",
 			Input: "$.",
+			Err:   fmt.Errorf("unexpected end of path"),
 		},
 		{
 			Name:  "With trailing dots",
 			Input: "$..",
+			Err:   fmt.Errorf("failed to parse child selector: unexpected end of path"),
 		},
 	}
 
