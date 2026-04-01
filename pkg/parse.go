@@ -19,6 +19,7 @@ func isAlphabetic(b byte) bool {
 // parseInt attempts to parse an integer from the provided byte slice. If no integer could be found, value is returned.
 func parseInt(path []byte, value int) (int, int, error) {
 	if len(path) == 0 {
+		// Handle incomplete range step e.g. "$['x'][0:10:"
 		return 0, value, nil
 	}
 
@@ -56,6 +57,7 @@ func parseIndexRange(path []byte, start int) (int, *subscript, error) {
 	var i int
 
 	if len(path) == 0 {
+		// Handle incomplete range e.g. "$['test'][5:"
 		return 0, nil, fmt.Errorf("expected ']' but none")
 	}
 
@@ -70,6 +72,7 @@ func parseIndexRange(path []byte, start int) (int, *subscript, error) {
 
 	i += consumed
 	if i >= len(path) {
+		// Handle incomplete range e.g. "$['x'][0:10"
 		return 0, nil, fmt.Errorf("expected ']' but none")
 	}
 
@@ -87,6 +90,7 @@ func parseIndexRange(path []byte, start int) (int, *subscript, error) {
 
 	i += consumed
 	if i >= len(path) {
+		// Handle incomplete range e.g. "$['x'][0:10:
 		return 0, nil, fmt.Errorf("expected ']' but none")
 	}
 
@@ -195,7 +199,7 @@ func parseChildSelectorBracketNotation(path []byte) (int, selector, error) {
 		}
 
 		if path[i] == '\'' {
-			return 0, nil, fmt.Errorf("single quotes must be escapped in bracket notation")
+			return 0, nil, fmt.Errorf("single quotes must be escaped in bracket notation")
 		}
 
 		if path[i] == '\\' {
@@ -341,6 +345,7 @@ func parseChildUnion(path []byte) (int, selector, error) {
 
 func parseRecursiveDescent(path []byte) (int, selector, error) {
 	if len(path) == 0 {
+		// Handle when a dotted-path isn't continued e.g. "$.."
 		return 0, nil, fmt.Errorf("unexpected end of path")
 	}
 
@@ -401,6 +406,7 @@ func Parse(path string) (*JSONPath, error) {
 			var consumed int
 
 			if i+1 >= len(pathBytes) {
+				// Handle case where a dotted-path isn't continued e.g. "$."
 				return nil, fmt.Errorf("unexpected end of path")
 			}
 
