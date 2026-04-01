@@ -360,6 +360,10 @@ func TestParse(t *testing.T) {
 			Input: "$..",
 			Err:   fmt.Errorf("failed to parse child selector: unexpected end of path"),
 		},
+		{
+			Name:  "With incomplete multi-digit range",
+			Input: "$['x'][0:10",
+		},
 	}
 
 	for _, c := range cases {
