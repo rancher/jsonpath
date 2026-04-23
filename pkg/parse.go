@@ -18,17 +18,22 @@ func isAlphabetic(b byte) bool {
 
 // parseInt attempts to parse an integer from the provided byte slice. If no integer could be found, value is returned.
 func parseInt(path []byte, value int) (int, int, error) {
+	if len(path) == 0 {
+		// Handle incomplete range step e.g. "$['x'][0:10:"
+		return 0, value, nil
+	}
+
 	intBytes := make([]byte, len(path))
 
 	var i int
-	var c byte
 
 	if path[i] == '-' {
 		intBytes[i] = '-'
 		i++
 	}
 
-	for i, c = range path {
+	for ; i < len(path); i++ {
+		c := path[i]
 		if c == ':' || c == ']' || c == ',' {
 			break
 		}
@@ -51,6 +56,11 @@ func parseInt(path []byte, value int) (int, int, error) {
 func parseIndexRange(path []byte, start int) (int, *subscript, error) {
 	var i int
 
+	if len(path) == 0 {
+		// Handle incomplete range e.g. "$['test'][5:"
+		return 0, nil, fmt.Errorf("expected ']' but none")
+	}
+
 	if path[0] == ']' {
 		return 1, &subscript{start: &start, end: ptr.To(-1)}, nil
 	}
@@ -61,11 +71,14 @@ func parseIndexRange(path []byte, start int) (int, *subscript, error) {
 	}
 
 	i += consumed
+	if i >= len(path) {
+		// Handle incomplete range e.g. "$['x'][0:10"
+		return 0, nil, fmt.Errorf("expected ']' but none")
+	}
 
 	if path[i] == ']' {
 		return i + 1, &subscript{start: &start, end: &end}, nil
 	} else if path[i] != ':' {
-		i++
 		return 0, nil, fmt.Errorf("expected \":\" but found %c", path[i])
 	}
 
@@ -75,7 +88,15 @@ func parseIndexRange(path []byte, start int) (int, *subscript, error) {
 		return 0, nil, fmt.Errorf("failed to parse range step: %v", err)
 	}
 
+	if step <= 0 {
+		return 0, nil, fmt.Errorf("range step must be greater than zero")
+	}
+
 	i += consumed
+	if i >= len(path) {
+		// Handle incomplete range e.g. "$['x'][0:10:
+		return 0, nil, fmt.Errorf("expected ']' but none")
+	}
 
 	if path[i] != ']' {
 		return 0, nil, fmt.Errorf("expected \"]\" but found %c", path[i])
@@ -104,6 +125,11 @@ func parseIndexUnion(path []byte, start int) (int, *subscript, error) {
 		i += consumed
 
 		r.union = append(r.union, n)
+
+		if i >= len(path) {
+			// Handle missing closing brackets e.g. "$['x'][2,4"
+			return 0, nil, fmt.Errorf("expected ']' but none")
+		}
 
 		if path[i] == ']' {
 			break
@@ -182,7 +208,7 @@ func parseChildSelectorBracketNotation(path []byte) (int, selector, error) {
 		}
 
 		if path[i] == '\'' {
-			return 0, nil, fmt.Errorf("single quotes must be escapped in bracket notation")
+			return 0, nil, fmt.Errorf("single quotes must be escaped in bracket notation")
 		}
 
 		if path[i] == '\\' {
@@ -327,6 +353,11 @@ func parseChildUnion(path []byte) (int, selector, error) {
 }
 
 func parseRecursiveDescent(path []byte) (int, selector, error) {
+	if len(path) == 0 {
+		// Handle when a dotted-path isn't continued e.g. "$.."
+		return 0, nil, fmt.Errorf("unexpected end of path")
+	}
+
 	var s selector
 	var consumed int
 	var err error
@@ -382,6 +413,11 @@ func Parse(path string) (*JSONPath, error) {
 			var s selector
 			var err error
 			var consumed int
+
+			if i+1 >= len(pathBytes) {
+				// Handle case where a dotted-path isn't continued e.g. "$."
+				return nil, fmt.Errorf("unexpected end of path")
+			}
 
 			if pathBytes[i+1] == '[' {
 				consumed, s, err = parseChildUnion(pathBytes[i+1:])

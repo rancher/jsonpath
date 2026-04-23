@@ -266,14 +266,14 @@ func TestParse(t *testing.T) {
 			Err:   fmt.Errorf("failed to parse child selector: only characters in range A-Za-z_- are allowed in dot notation identifiers but found '?'"),
 		},
 		{
-			Name:  "With Unescapped Wildcard",
+			Name:  "With Unescaped Wildcard",
 			Input: "$.with*wildcard.child",
 			Err:   fmt.Errorf("failed to parse child selector: found unescaped '*' in identifier"),
 		},
 		{
-			Name:  "With Unescapped Open Bracket",
+			Name:  "With Unescaped Open Bracket",
 			Input: "$.with[bracket.child",
-			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse range start: failed to parse integer: strconv.Atoi: parsing \"bracket.chil\": invalid syntax"),
+			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse range start: failed to parse integer: strconv.Atoi: parsing \"bracket.child\": invalid syntax"),
 		},
 		{
 			Name:  "With Invalid Index",
@@ -311,14 +311,14 @@ func TestParse(t *testing.T) {
 			Err:   fmt.Errorf("unexpected character '''"),
 		},
 		{
-			Name:  "With Unescapped Quote",
+			Name:  "With Unescaped Quote",
 			Input: "$['bad ' quote']",
-			Err:   fmt.Errorf("failed to parse child selector: single quotes must be escapped in bracket notation"),
+			Err:   fmt.Errorf("failed to parse child selector: single quotes must be escaped in bracket notation"),
 		},
 		{
 			Name:  "With Missing Closing Bracket",
 			Input: "$['parent'",
-			Err:   fmt.Errorf("failed to parse child selector: single quotes must be escapped in bracket notation"),
+			Err:   fmt.Errorf("failed to parse child selector: single quotes must be escaped in bracket notation"),
 		},
 		{
 			Name:  "With Missing End Bracket in Wildcard Index Range",
@@ -344,6 +344,46 @@ func TestParse(t *testing.T) {
 			Name:  "With No Chars after Comma in Union",
 			Input: "$.[a,,].child",
 			Err:   fmt.Errorf("failed to parse child selector: union options may not be empty"),
+		},
+		{
+			Name:  "With Incomplete Range at JSONPath end",
+			Input: "$['test'][5:",
+			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index range: expected ']' but none"),
+		},
+		{
+			Name:  "With Incomplete Range Step at JSONPath end",
+			Input: "$['x'][0:10:",
+			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index range: expected ']' but none"),
+		},
+		{
+			Name:  "With incomplete multi-digit range at JSONPath end",
+			Input: "$['x'][0:10",
+			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index range: expected ']' but none"),
+		},
+		{
+			Name:  "With missing closing bracket in index union",
+			Input: "$['x'][2,4",
+			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index union: expected ']' but none"),
+		},
+		{
+			Name:  "With zero step in index range",
+			Input: "$['x'][0:10:0]",
+			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index range: range step must be greater than zero"),
+		},
+		{
+			Name:  "With trailing dot",
+			Input: "$.",
+			Err:   fmt.Errorf("unexpected end of path"),
+		},
+		{
+			Name:  "With trailing dots",
+			Input: "$..",
+			Err:   fmt.Errorf("failed to parse child selector: unexpected end of path"),
+		},
+		{
+			Name:  "With Range Step zero",
+			Input: "$['x'][0:10:0]",
+			Err:   fmt.Errorf("failed to parse child selector: failed to parse subscript: failed to parse index range: range step must be greater than zero"),
 		},
 	}
 

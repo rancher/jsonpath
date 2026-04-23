@@ -82,6 +82,30 @@ func (c selectChild) matchNodeIndexRange(n node) bool {
 
 		return *n.index == start
 
+	case c.subscript.start != nil && c.subscript.end != nil && c.subscript.step == nil:
+		if reflect.ValueOf(n.value).Kind() != reflect.Slice {
+			return false
+		}
+
+		sliceLen := reflect.ValueOf(n.value).Len()
+
+		start := *c.subscript.start
+		end := *c.subscript.end
+
+		if start < 0 {
+			start = sliceLen - -start%sliceLen
+		}
+
+		if end < 0 {
+			end = sliceLen - -end%sliceLen + 1
+		}
+
+		if end > sliceLen || *n.index < start || *n.index >= end {
+			return false
+		}
+
+		return true
+
 	case c.subscript.start != nil && c.subscript.end != nil && c.subscript.step != nil:
 		if reflect.ValueOf(n.value).Kind() != reflect.Slice {
 			return false

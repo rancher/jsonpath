@@ -152,6 +152,28 @@ func TestJsonPathSet(t *testing.T) {
 				},
 			},
 		},
+		{
+			Name:     "With invalid match",
+			JSONPath: testParse(t, "$.parent[0:10]"),
+			Object: map[string]any{
+				"parent": []any{
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+				},
+			},
+			Expected: map[string]any{
+				"parent": []any{
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+				},
+			},
+		},
 	}
 
 	for _, c := range cases {
@@ -160,4 +182,12 @@ func TestJsonPathSet(t *testing.T) {
 			assert.Equal(t, c.Expected, c.Object)
 		})
 	}
+}
+
+func testParse(t *testing.T, s string) *JSONPath {
+	t.Helper()
+	jsonPath, err := Parse(s)
+	assert.NoError(t, err)
+
+	return jsonPath
 }
